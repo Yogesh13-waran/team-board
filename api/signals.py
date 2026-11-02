@@ -70,3 +70,4 @@ def create_company_profile(sender, instance, created, **kwargs):
             api_key=secrets.token_urlsafe(32),
             role=Company.Role.CLIENT
         )
+

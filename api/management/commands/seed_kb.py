@@ -229,3 +229,4 @@ class Command(BaseCommand):
                     f"api_key='{company.api_key}'"
                 )
             )
+

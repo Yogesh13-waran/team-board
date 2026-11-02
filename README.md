@@ -429,3 +429,4 @@ SELECT id, company_id, search_term, results_count, queried_at FROM api_querylog;
 
 For a thorough breakdown of every architectural decision, ORM query mechanics, transaction isolation levels, signals vs model overrides, JWT cryptography, and 25+ real-world senior interview questions, read our complete guide:
 👉 **[`INTERVIEW_GUIDE.md`](file:///c:/Users/yoges/python-teamboard/INTERVIEW_GUIDE.md)**
+

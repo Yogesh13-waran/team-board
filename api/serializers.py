@@ -156,3 +156,4 @@ class UsageSummarySerializer(serializers.Serializer):
     total_queries = serializers.IntegerField()
     active_companies = serializers.IntegerField()
     top_search_terms = TopSearchTermSerializer(many=True)
+

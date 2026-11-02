@@ -62,3 +62,4 @@ class IsAdminUser(BasePermission):
 
         # 3. Company role must explicitly be ADMIN (never use is_staff / is_superuser)
         return request.user.company.role == Company.Role.ADMIN
+

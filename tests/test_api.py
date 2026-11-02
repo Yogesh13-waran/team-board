@@ -454,3 +454,4 @@ class SignalAndIntegrityTests(TeamBoardBaseTestCase):
         self.assertEqual(company.user, new_user)
         self.assertEqual(company.role, Company.Role.CLIENT)
         self.assertTrue(len(company.api_key) >= 32)
+
