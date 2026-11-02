@@ -1,0 +1,680 @@
+{
+	"info": {
+		"_postman_id": "a9d7b41e-6e42-4f9e-bc8e-1287954a7c10",
+		"name": "TeamBoard B2B Knowledge Base API",
+		"description": "Complete Postman test suite covering all 11 required scenarios for the TeamBoard B2B Knowledge Base API platform.\n\nIncludes automated tests and collection variable extractors for seamless end-to-end execution.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "client_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "01 - Authentication",
+			"item": [
+				{
+					"name": "Scenario 1: POST /api/auth/register/ - Success (201)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has username, company_name, api_key, access\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('username');",
+									"    pm.expect(jsonData).to.have.property('company_name');",
+									"    pm.expect(jsonData).to.have.property('api_key');",
+									"    pm.expect(jsonData).to.have.property('access');",
+									"    pm.expect(jsonData.username).to.eql(\"acmecorp\");",
+									"    pm.expect(jsonData.company_name).to.eql(\"Acme Corp\");",
+									"    ",
+									"    // Save credentials for subsequent requests",
+									"    pm.collectionVariables.set(\"client_token\", jsonData.access);",
+									"    pm.collectionVariables.set(\"api_key\", jsonData.api_key);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"acmecorp\",\n    \"password\": \"securepass123\",\n    \"company_name\": \"Acme Corp\",\n    \"email\": \"dev@acmecorp.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register",
+								""
+							]
+						},
+						"description": "Registers a new B2B client company. Returns JWT access token and auto-generated API key."
+					},
+					"response": []
+				},
+				{
+					"name": "Scenario 2: POST /api/auth/register/ - Duplicate Username (400)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error response indicates username already exists\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('username');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"acmecorp\",\n    \"password\": \"anotherpass123\",\n    \"company_name\": \"Duplicate Corp\",\n    \"email\": \"other@acmecorp.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register",
+								""
+							]
+						},
+						"description": "Attempts to register with an already existing username, returning 400."
+					},
+					"response": []
+				},
+				{
+					"name": "Scenario 3: POST /api/auth/register/ - Missing Fields (400)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response contains validation errors for missing fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('password');",
+									"    pm.expect(jsonData).to.have.property('company_name');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"incomplete_user\",\n    \"email\": \"incomplete@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register",
+								""
+							]
+						},
+						"description": "Submits payload with missing required fields (password, company_name), returning 400."
+					},
+					"response": []
+				},
+				{
+					"name": "Scenario 4: POST /api/auth/login/ - Success (200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains access token, company_name, and api_key\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('access');",
+									"    pm.expect(jsonData).to.have.property('company_name');",
+									"    pm.expect(jsonData).to.have.property('api_key');",
+									"    pm.expect(jsonData.company_name).to.eql(\"Acme Corp\");",
+									"    ",
+									"    // Update client token",
+									"    pm.collectionVariables.set(\"client_token\", jsonData.access);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"acmecorp\",\n    \"password\": \"securepass123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login",
+								""
+							]
+						},
+						"description": "Logs in with valid credentials, returning JWT access token and company credentials."
+					},
+					"response": []
+				},
+				{
+					"name": "Scenario 5: POST /api/auth/login/ - Invalid Credentials (401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test(\"Returns clear error message in detail field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('detail');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"acmecorp\",\n    \"password\": \"wrong_password_999\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login",
+								""
+							]
+						},
+						"description": "Submits invalid password, returning 401 Unauthorized."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02 - Knowledge Base Search",
+			"item": [
+				{
+					"name": "Scenario 6: POST /api/kb/query/ - No Token Provided (401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"search\": \"select_related\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/kb/query/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kb",
+								"query",
+								""
+							]
+						},
+						"description": "Queries knowledge base without Bearer token, returning 401."
+					},
+					"response": []
+				},
+				{
+					"name": "Scenario 7: POST /api/kb/query/ - Success With Matches (200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains search, count > 0, and results array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('search');",
+									"    pm.expect(jsonData).to.have.property('count');",
+									"    pm.expect(jsonData).to.have.property('results');",
+									"    pm.expect(jsonData.count).to.be.above(0);",
+									"    pm.expect(jsonData.results).to.be.an('array');",
+									"    pm.expect(jsonData.results[0]).to.have.property('question');",
+									"    pm.expect(jsonData.results[0]).to.have.property('answer');",
+									"    pm.expect(jsonData.results[0]).to.have.property('category');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{client_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"search\": \"how to use select_related\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/kb/query/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kb",
+								"query",
+								""
+							]
+						},
+						"description": "Performs search with matching keywords. Returns 200 with result entries and count."
+					},
+					"response": []
+				},
+				{
+					"name": "Scenario 8: POST /api/kb/query/ - Zero Results Matched (200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response returns count 0 and empty results array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.count).to.eql(0);",
+									"    pm.expect(jsonData.results).to.be.an('array').that.is.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{client_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"search\": \"completely_nonexistent_technical_term_xyz_404\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/kb/query/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kb",
+								"query",
+								""
+							]
+						},
+						"description": "Performs search with zero matches. Returns 200 with count: 0 and results: []. QueryLog is still recorded for usage billing."
+					},
+					"response": []
+				},
+				{
+					"name": "Scenario 9: POST /api/kb/query/ - Blank/Missing Search Term (400)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response contains validation error for search field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('search');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{client_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"search\": \"   \"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/kb/query/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kb",
+								"query",
+								""
+							]
+						},
+						"description": "Sends empty or blank whitespace search term. Returns 400 Bad Request."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03 - Admin Usage Dashboard",
+			"item": [
+				{
+					"name": "Scenario 10: GET /api/admin/usage-summary/ - Client Forbidden (403)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"pm.test(\"Response indicates lack of permission\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('detail');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{client_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/usage-summary/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"usage-summary",
+								""
+							]
+						},
+						"description": "Standard CLIENT role user attempts to access admin dashboard. Returns 403 Forbidden."
+					},
+					"response": []
+				},
+				{
+					"name": "Helper: POST /api/auth/login/ - Admin Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Sets admin_token variable\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('access');",
+									"    pm.collectionVariables.set(\"admin_token\", jsonData.access);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"teamboard_admin\",\n    \"password\": \"adminpass123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login",
+								""
+							]
+						},
+						"description": "Logs in as seeded platform administrator to acquire an admin JWT access token."
+					},
+					"response": []
+				},
+				{
+					"name": "Scenario 11: GET /api/admin/usage-summary/ - Admin Success (200)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response returns usage statistics\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('total_queries');",
+									"    pm.expect(jsonData).to.have.property('active_companies');",
+									"    pm.expect(jsonData).to.have.property('top_search_terms');",
+									"    pm.expect(jsonData.top_search_terms).to.be.an('array');",
+									"    pm.expect(jsonData.total_queries).to.be.a('number');",
+									"    pm.expect(jsonData.active_companies).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/usage-summary/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"usage-summary",
+								""
+							]
+						},
+						"description": "Platform administrator requests usage dashboard. Returns 200 with total queries, active companies count, and top 5 search terms."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,12 @@
+# TeamBoard Backend - Production Dependencies
+# All dependencies pinned to exact versions as required by Step 1 & Submission guidelines
+Django==6.1
+djangorestframework==3.18.0
+djangorestframework-simplejwt==5.5.1
+PyJWT==2.15.1
+python-dotenv==1.2.4
+psycopg==3.3.4
+psycopg-binary==3.3.4
+sqlparse==0.5.5
+asgiref==3.12.1
+tzdata==2026.3
